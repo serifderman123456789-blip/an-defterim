@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="tr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Minik Anılar – Bebek Anı Defteri</title>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Caveat&family=Dancing+Script&family=Quicksand&family=Lora&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fdf3ee;--paper:#fffdf8;--ink:#4a3b3b;--mut:#8a7777;--ac:#e88fa3;--line:#eadcd3;--font:'Quicksand',sans-serif;--pg:#f6c9d4;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;font-family:'Quicksand',sans-serif;color:var(--ink);background:var(--pg) center/cover fixed;min-height:100vh}
+button,input,select,textarea{font:inherit;color:inherit}
+.top{position:sticky;top:env(safe-area-inset-top,0px);display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--ac);color:#fff;z-index:5}
+.top h1{font-size:18px;margin:0;font-family:'Pacifico',cursive;font-weight:400}
+.ib{background:none;border:0;color:#fff;font-size:26px;cursor:pointer}
+.drawer{position:fixed;inset:0 auto 0 0;width:270px;max-width:80%;background:var(--paper);z-index:10;transform:translateX(-105%);transition:.3s;padding:16px;overflow:auto;box-shadow:2px 0 14px #0004}
+.drawer.o{transform:none}.shade{position:fixed;inset:0;background:#0006;z-index:9;display:none}.shade.o{display:block}
+.drawer a{display:block;padding:12px;border-radius:10px;cursor:pointer}.drawer a:hover{background:var(--line)}
+.wrap{max-width:560px;margin:14px auto;padding:0 12px}
+.book{perspective:1400px}
+.page{background:var(--paper);border-radius:6px 14px 14px 6px;border-left:10px solid var(--ac);box-shadow:0 6px 20px #0003;padding:18px;min-height:60vh;transform-origin:left center}
+.page.fn{animation:fn .6s ease}.page.fp{animation:fp .6s ease}
+@keyframes fn{from{transform:rotateY(-95deg);opacity:.3}to{transform:none;opacity:1}}
+@keyframes fp{from{transform:rotateY(95deg);opacity:.3}to{transform:none;opacity:1}}
+h2{margin:0 0 8px;color:var(--ac)}
+label{display:block;font-size:13px;color:var(--mut);margin:10px 0 3px}
+input,select,textarea{width:100%;padding:9px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+textarea{min-height:140px;font-family:var(--font);font-size:17px}
+.btn{background:var(--ac);color:#fff;border:0;border-radius:22px;padding:10px 16px;cursor:pointer;margin:4px 4px 0 0}
+.btn.s{background:var(--line);color:var(--ink)}
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:12px;color:var(--mut)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin:10px 0}
+.grid img,.grid video{width:100%;border-radius:10px;border:4px solid #fff;box-shadow:0 2px 6px #0003}
+.info{display:grid;grid-template-columns:1fr 1fr;gap:8px}.info div{background:var(--bg);border-radius:12px;padding:8px;text-align:center}
+.info b{display:block;font-size:12px;color:var(--mut)}
+.cover{width:120px;height:120px;border-radius:50%;object-fit:cover;display:block;margin:0 auto 8px;border:4px solid var(--ac)}
+.txt{white-space:pre-wrap;font-size:18px;line-height:1.6}
+.sw{display:flex;gap:8px;flex-wrap:wrap}.sw span{width:34px;height:34px;border-radius:50%;cursor:pointer;border:3px solid #fff;box-shadow:0 0 0 1px var(--line)}
+.note{font-size:12px;color:var(--mut)}
+.book .page{font-family:var(--font)}
+#deco{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+#deco span{position:absolute;opacity:.9;animation:fl 5s ease-in-out infinite alternate}
+@keyframes fl{to{transform:translateY(-16px) rotate(10deg)}}
+.wrap{position:relative;z-index:1}
+.top svg{flex:none}
+.fr{position:relative;display:grid;place-items:center;width:min(100%,200px);aspect-ratio:1;margin:16px auto;border:4px dotted var(--ac);border-radius:22px;background:#fff center/cover no-repeat;cursor:pointer;text-align:center;font-size:13px;color:var(--mut);padding:10px}
+.fr input{display:none}.fr i{position:absolute;font-style:normal;font-size:22px;line-height:1}
+.hero{text-align:center;background:linear-gradient(160deg,var(--paper),color-mix(in srgb,var(--ac) 20%,#fff))}
+.hero .lg{margin:6px auto}.hero .f{text-align:left}
+.feat{display:grid;gap:6px;margin:12px 0;font-size:14px}.feat span{background:var(--bg);border-radius:14px;padding:8px 10px}
+</style></head><body>
+<div class="top"><button class="ib" id="mb" aria-label="Menü">☰</button><span id="lg"></span><h1>Minik Anılar</h1></div>
+<div class="shade" id="sh"></div><div class="drawer" id="dr"></div>
+<div id="deco"></div><div class="wrap" id="app"></div>
+<script>
+const FONTS={'Quicksand':"'Quicksand',sans-serif",'El yazısı':"'Caveat',cursive",'Süslü':"'Dancing Script',cursive",'Klasik':"'Lora',serif",'Pacifico':"'Pacifico',cursive"};
+const COLORS=['#e88fa3','#7fb3d5','#82c3a5','#c9a0dc','#f0a868','#8b7e74'];
+const PALE={'#e88fa3':'#fdf3ee','#7fb3d5':'#eef5fb','#82c3a5':'#eef8f2','#c9a0dc':'#f6eefa','#f0a868':'#fdf4e8','#8b7e74':'#f3efea'};
+let S={user:null,babies:[],cur:0,idx:0,view:'auth',edit:false,set:{font:'Quicksand',color:'#e88fa3',bgImg:''}};
+const $=s=>document.querySelector(s);
+const esc=t=>String(t||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const key=e=>'ani:'+e;
+function persist(){if(!S.user)return;S.upd=Date.now();try{const d=JSON.parse(JSON.stringify({babies:S.babies,set:S.set}));d.babies.forEach(b=>b.pages.forEach(p=>p.media=p.media.map(m=>m.t=='v'?{t:'v',name:m.name}:m)));localStorage.setItem(key(S.user.email),JSON.stringify({pw:S.user.pw,upd:S.upd,...d}))}catch(e){alert('Yerel depolama dolu: bazı fotoğraflar kaydedilemedi.')}cloudSoon()}
+function theme(){const r=document.documentElement.style,t=S.set,a=t.color||'#e88fa3';r.setProperty('--ac',a);r.setProperty('--font',FONTS[t.font]||FONTS.Quicksand);r.setProperty('--pg',t.bgc||`color-mix(in srgb,${a} 38%,#fff)`);r.setProperty('--bg',`color-mix(in srgb,${a} 8%,#fff)`);r.setProperty('--line',`color-mix(in srgb,${a} 25%,#fff)`);r.setProperty('--paper',t.paper||'#fffdf8');r.setProperty('--ink',t.ink||'#4a3b3b');document.body.style.backgroundImage=t.bgImg?`url(${t.bgImg})`:'none';
+const dc=$('#deco');if(t.bgImg)dc.style.display='none';else{dc.style.display='block';if(!dc.children.length){const E=['👶','🧸','🦋','🍼','🧸','🦋','🌸','👶'];let h='';for(let i=0;i<26;i++)h+=`<span style="left:${(i*37)%94}%;top:${(i*53+11)%90}%;font-size:${26+(i*7)%22}px;animation-delay:${(i%6)*.7}s">${E[i%E.length]}</span>`;dc.innerHTML=h}}}
+function menu(){const d=$('#dr'),b=B();d.innerHTML=`<h2>Menü</h2>`+(S.user?`<small class="note">${esc(S.user.email)}</small>
+<a data-v="book">📖 Defterim</a><label>Sayfaya git (1-${b?b.pages.length+1:1})</label><div style="display:flex;gap:6px"><input id="dj" type="number" min="1" style="width:90px"><button class="btn" id="djb">Git</button></div><a data-v="babies">👶 Bebeklerim</a><a data-v="baby">📝 Bebek bilgileri</a><a data-v="look">🎨 Görünüm (yazı tipi, renk, arka plan)</a><a data-v="cloud">☁️ Bulut kaydı</a><a data-v="kvkk">🔒 KVKK Metni</a><a data-v="wipe" style="color:#c0392b">🗑️ Tüm verileri sil</a><a data-v="out">🚪 Çıkış</a>`:`<a data-v="kvkk">🔒 KVKK Metni</a>`);
+const g=$('#djb');if(g)g.onclick=()=>{if(!b)return alert('Önce bir bebek ekleyin.');const n=+$('#dj').value,t=b.pages.length+1;if(!(n>=1&&n<=t))return alert('1 ile '+t+' arasında bir sayfa numarası yazın.');tog(false);S.view='book';go(n-1,n-1>S.idx?1:-1)}}
+function tog(o){$('#dr').classList.toggle('o',o);$('#sh').classList.toggle('o',o)}
+$('#mb').onclick=()=>{menu();tog(true)};$('#sh').onclick=()=>tog(false);
+$('#dr').onclick=e=>{const v=e.target.dataset.v;if(!v)return;tog(false);if(v=='out'){if(!confirm('Çıkmak istiyor musunuz?'))return;S.user=null;S.view='auth'}else if(v=='wipe'){wipe();return}else if(v=='baby'){S.view=S.babies.length?'edit':'new'}else S.view=v;render()};
+const B=()=>S.babies[S.cur];
+function render(){theme();const a=$('#app');({auth,new:newBaby,edit:()=>newBaby(1),book,babies,look,cloud,kvkk})[S.view]()}
+function auth(){$('#app').innerHTML=`<div class="page hero"><div class="lg">${logo(96)}</div><h2 style="font-family:'Pacifico',cursive;font-size:32px;font-weight:400">Hoş geldiniz</h2><p style="margin:0">Bebeğinizin her anı, tek bir defterde 🍼</p>
+<div class="feat"><span>🤰 Ultrason ve doğum öncesi aylar</span><span>📸 5 yaşına kadar fotoğraf ve videolar</span><span>💌 Bebeğinize yazdığınız anı mektupları</span><span>☁️ Telefon değişse de anılar kaybolmaz</span></div>
+<div class="f"><label>E-posta</label><input id="em" type="email" placeholder="ornek@mail.com"><label>Şifre</label><input id="pw" type="password" placeholder="En az 6 karakter"></div>
+<button class="btn" id="li">Giriş yap</button><button class="btn s" id="su">Kayıt ol</button><p class="note">Şifreniz şifrelenerek (özet olarak) saklanır. 🔒</p></div>`;
+const go=async reg=>{const e=$('#em').value.trim().toLowerCase(),p=$('#pw').value;if(!e||p.length<6)return alert('Geçerli e-posta ve en az 6 karakterli şifre girin.');const h=await H(p);let d=null;try{d=JSON.parse(localStorage.getItem(key(e)))}catch(x){}const c=await cloudPull();
+if(reg){if(d||c)return alert(d?'Bu e-posta zaten kayıtlı.':'Bulutta kayıtlı bir defteriniz var, lütfen giriş yapın.');S.user={email:e,pw:h};S.babies=[];S.view='new';persist()}
+else{const oL=d&&(d.pw===h||d.pw===p),oC=c&&c.email==e&&c.h==h;if(!oL&&!oC)return alert('E-posta veya şifre hatalı.');let src=oL?d:c;if(oC&&oL&&(c.upd||0)>(d.upd||0))src=c;S.user={email:e,pw:h};S.babies=src.babies;S.set=src.set||S.set;S.view=S.babies.length?'book':'new';persist()}
+S.cur=0;S.idx=0;render()};$('#li').onclick=()=>go(0);$('#su').onclick=()=>go(1)}
+function img(file,cb,mx){if(!file)return;const r=new FileReader();r.onload=()=>{const i=new Image();i.onload=()=>{const k=Math.min(1,(mx||560)/i.width),c=document.createElement('canvas');c.width=i.width*k;c.height=i.height*k;c.getContext('2d').drawImage(i,0,0,c.width,c.height);cb(c.toDataURL('image/jpeg',.65))};i.src=r.result};r.readAsDataURL(file)}
+let tmpPhoto='';
+function newBaby(ed){const b=ed?B():{};tmpPhoto=b.photo||'';$('#app').innerHTML=`<div class="page"><h2>${ed?'Bebek bilgileri':'Bebeğinizi tanıyalım 👶'}</h2>
+<label>Bebeğin adı</label><input id="n" value="${esc(b.name)}"><label>Doğum tarihi (veya tahmini)</label><input id="d" type="date" value="${esc(b.birth)}">
+<label>Doğum yeri</label><input id="pl" value="${esc(b.place)}"><label>Doğum kilosu (kg)</label><input id="w" type="number" step="0.01" value="${esc(b.weight)}">
+<label>Doğum boyu (cm)</label><input id="h" type="number" value="${esc(b.height)}"><label>Baş çevresi (cm)</label><input id="hc" type="number" value="${esc(b.head)}">
+<label>Anne / baba adı</label><input id="par" value="${esc(b.parents)}"><label>İlk sayfa notu</label><textarea id="nt" style="min-height:70px">${esc(b.notes)}</textarea>
+<label>Kapak fotoğrafı</label>${frame('ph','Bebeğin fotoğrafını eklemek için dokun','image/*',0,tmpPhoto)}<button class="btn" id="sv">Kaydet ve deftere geç</button></div>`;
+$('#ph').onchange=e=>img(e.target.files[0],u=>{tmpPhoto=u;showFr('ph',u)},360);
+$('#sv').onclick=()=>{if(!$('#n').value)return alert('Lütfen bebeğin adını yazın.');const o={name:$('#n').value,birth:$('#d').value,place:$('#pl').value,weight:$('#w').value,height:$('#h').value,head:$('#hc').value,parents:$('#par').value,notes:$('#nt').value,photo:tmpPhoto};
+if(ed)Object.assign(B(),o);else{S.babies.push({id:Date.now(),...o,pages:[]});S.cur=S.babies.length-1}S.idx=0;S.view='book';persist();render()}}
+function go(n,dir){S.idx=n;S.edit=false;render();const p=$('.page');p.classList.add(dir>0?'fn':'fp')}
+function book(){const b=B(),tot=b.pages.length+1;let h='';
+if(S.idx==0){h=`<h2>${esc(b.name)}’in Anı Defteri</h2>${b.photo?`<img class="cover" src="${b.photo}">`:''}<div class="info"><div><b>Doğum tarihi</b>${esc(b.birth)||'–'}</div><div><b>Doğum yeri</b>${esc(b.place)||'–'}</div><div><b>Kilo</b>${esc(b.weight)||'–'} kg</div><div><b>Boy</b>${esc(b.height)||'–'} cm</div><div><b>Baş çevresi</b>${esc(b.head)||'–'} cm</div><div><b>Anne/Baba</b>${esc(b.parents)||'–'}</div></div><p class="txt">${esc(b.notes)}</p>
+<button class="btn" id="np">➕ Yeni sayfa</button><button class="btn s" id="pre">🤰 Doğum öncesi 9 ayı ekle</button>`}
+else{const p=b.pages[S.idx-1];const ed=S.edit||!p.saved;
+h=ed?`<label>Sayfa başlığı</label><input id="t" value="${esc(p.title)}"><label>Dönem</label><input id="pr" value="${esc(p.period)}" placeholder="Örn. 3. ay, 1 yaş, 2 yaş…"><label>Tarih</label><input id="dt" type="date" value="${esc(p.date)}">
+<label>Anı yazısı</label><textarea id="tx" placeholder="Bebeğine bir mektup yaz…">${esc(p.text)}</textarea><label>Fotoğraf / video / ultrason ekle</label>${frame('f','Fotoğraf veya video eklemek için dokun','image/*,video/*',1)}
+<div class="grid" id="gr">${gal(p,1)}</div><button class="btn" id="sv">💾 Kaydet</button><button class="btn s" id="del">Sayfayı sil</button>`
+:`<h2>${esc(p.title)||'Başlıksız'}</h2><div class="note">${esc(p.period)} ${esc(p.date)}</div><p class="txt">${esc(p.text)}</p><div class="grid">${gal(p)}</div><button class="btn s" id="ed">✏️ Düzenle</button><button class="btn" id="np">➕ Yeni sayfa</button>`}
+$('#app').innerHTML=`<div class="book"><div class="page">${h}</div></div><div class="nav"><button class="btn s" id="pv" ${S.idx?'':'disabled'}>◀</button><span><input id="jp" type="number" min="1" max="${tot}" value="${S.idx+1}" style="width:62px;text-align:center"> / ${tot}</span><button class="btn s" id="nx" ${S.idx<tot-1?'':'disabled'}>▶</button></div>`;
+$('#pv').onclick=()=>go(S.idx-1,-1);$('#nx').onclick=()=>go(S.idx+1,1);$('#jp').onchange=e=>{const n=+e.target.value;if(n>=1&&n<=tot)go(n-1,n-1>S.idx?1:-1);else{alert('1 ile '+tot+' arasında bir sayfa numarası yazın.');e.target.value=S.idx+1}};
+const q=s=>$(s);
+if(q('#np'))q('#np').onclick=()=>{b.pages.push({id:Date.now(),title:'',period:'',date:'',text:'',media:[],saved:false});go(b.pages.length,1)};
+if(q('#pre'))q('#pre').onclick=()=>{if(b.pages.some(p=>p.pre))return alert('Doğum öncesi aylar zaten eklendi.');for(let i=1;i<=9;i++)b.pages.unshift({id:Date.now()+i,title:i+'. ay',period:'Doğum öncesi',date:'',text:'',media:[],saved:false,pre:1});b.pages.sort((x,y)=>(y.pre?1:0)-(x.pre?1:0));let k=0;b.pages.filter(p=>p.pre).forEach(p=>p.title=(++k)+'. ay');persist();go(1,1)};
+if(q('#ed'))q('#ed').onclick=()=>{S.edit=true;render()};
+if(S.idx&&q('#sv')){const p=b.pages[S.idx-1];
+q('#f').onchange=async e=>{for(const f of e.target.files){if(f.type.startsWith('video'))p.media.push({t:'v',src:URL.createObjectURL(f),name:f.name});else await new Promise(r=>img(f,u=>{p.media.push({t:'i',src:u});r()}))}q('#gr').innerHTML=gal(p,1);book2()};
+q('#sv').onclick=()=>{p.title=q('#t').value;p.period=q('#pr').value;p.date=q('#dt').value;p.text=q('#tx').value;p.saved=true;S.edit=false;persist();render()};
+q('#del').onclick=()=>{if(confirm('Bu sayfa silinsin mi?')){b.pages.splice(S.idx-1,1);S.idx=Math.max(0,S.idx-1);persist();render()}};
+document.querySelectorAll('[data-rm]').forEach(x=>x.onclick=()=>{p.media.splice(+x.dataset.rm,1);q('#gr').innerHTML=gal(p,1);book2()})}}
+function book2(){const p=B().pages[S.idx-1];document.querySelectorAll('[data-rm]').forEach(x=>x.onclick=()=>{p.media.splice(+x.dataset.rm,1);$('#gr').innerHTML=gal(p,1);book2()})}
+function gal(p,ed){return p.media.map((m,i)=>`<div>${m.t=='i'?`<img src="${m.src}">`:m.src?`<video src="${m.src}" controls></video>`:`<div class="note">🎞️ ${esc(m.name)} (video bu taslakta yeniden yüklenmeli)</div>`}${ed?`<button class="btn s" data-rm="${i}">Kaldır</button>`:''}</div>`).join('')}
+function babies(){$('#app').innerHTML=`<div class="page"><h2>Bebeklerim</h2>${S.babies.map((b,i)=>`<p><button class="btn ${i==S.cur?'':'s'}" data-i="${i}">${esc(b.name)}</button></p>`).join('')}<button class="btn" id="ab">➕ Yeni bebek ekle</button></div>`;
+document.querySelectorAll('[data-i]').forEach(x=>x.onclick=()=>{S.cur=+x.dataset.i;S.idx=0;S.view='book';render()});$('#ab').onclick=()=>{S.view='new';render()}}
+function look(){const t=S.set;$('#app').innerHTML=`<div class="page"><h2>Görünüm</h2><label>Defter yazı tipi (menü ve KVKK sabit kalır)</label><select id="fs">${Object.keys(FONTS).map(f=>`<option ${f==t.font?'selected':''}>${f}</option>`).join('')}</select>
+<label>Tema rengi: hazır renkler veya sınırsız seçim</label><div class="sw">${COLORS.map(c=>`<span data-c="${c}" style="background:${c}"></span>`).join('')}</div><input id="cc" type="color" value="${t.color||'#e88fa3'}" style="height:44px;padding:2px;margin-top:8px">
+<label>Arka plan rengi</label><input id="cb" type="color" value="${t.bgc||'#f6c9d4'}" style="height:44px;padding:2px"><label>Sayfa (kağıt) rengi</label><input id="cp" type="color" value="${t.paper||'#fffdf8'}" style="height:44px;padding:2px"><label>Yazı rengi</label><input id="ci" type="color" value="${t.ink||'#4a3b3b'}" style="height:44px;padding:2px">
+<label>Arka plan fotoğrafı</label>${frame('bg','Arka plan fotoğrafı eklemek için dokun','image/*',0,t.bgImg)}<button class="btn s" id="bgx">Fotoğrafı kaldır</button><button class="btn s" id="rs">Varsayılana dön</button>
+<p class="txt" style="font-family:var(--font);font-size:22px">Önizleme: Minik meleğim, iyi ki doğdun.</p></div>`;
+$('#fs').onchange=e=>{S.set.font=e.target.value;persist();render()};document.querySelectorAll('[data-c]').forEach(x=>x.onclick=()=>{S.set.color=x.dataset.c;S.set.bgc='';persist();render()});
+[['cc','color'],['cb','bgc'],['cp','paper'],['ci','ink']].forEach(([i,k])=>{$('#'+i).oninput=e=>{S.set[k]=e.target.value;theme()};$('#'+i).onchange=()=>persist()});
+$('#bg').onchange=e=>img(e.target.files[0],u=>{S.set.bgImg=u;persist();render()},900);$('#bgx').onclick=()=>{S.set.bgImg='';persist();render()};$('#rs').onclick=()=>{S.set={font:'Quicksand',color:'#e88fa3',bgImg:t.bgImg};persist();render()}}
+function cloud(){const ok=S.cl=='ok';$('#app').innerHTML=`<div class="page"><h2>☁️ Bulut kaydı</h2><p>${ok?'<b style="color:#2e9e5b">● Bağlı</b> – anılarınız, ayarlarınız ve fotoğraflarınız otomatik buluta kaydedilir. Telefon değiştirince aynı e-posta ve şifreyle giriş yapıp defterinizi geri alırsınız.':'<b style="color:#c0392b">● Bağlı değil</b> – bulut için bu sayfayı claude.ai hesabınızla açmanız gerekir.'}</p><p class="note">${esc(S.sy||'')}</p>${ok?'<button class="btn" id="cs">☁️ Şimdi eşitle</button><button class="btn s" id="cr">⬇️ Buluttan geri yükle</button>':''}<p class="note">Bu sürümde bulut, claude.ai hesabınıza bağlıdır. Videolar bulutta tutulmaz (yalnızca fotoğraflar). Herkese açık yayında kendi sunucunuz (Firebase/Supabase) bağlanacaktır.</p></div>`;
+if(ok){$('#cs').onclick=()=>{sent={};cloudPush()};$('#cr').onclick=async()=>{const c=await cloudPull();if(!c)return alert('Bulutta kayıt bulunamadı.');if(!confirm('Bu cihazdaki defter bulut sürümüyle değiştirilecek. Devam edilsin mi?'))return;S.babies=c.babies;S.set=c.set;S.cur=0;S.idx=0;persist();S.view='book';render()}}}
+function kvkk(){$('#app').innerHTML=`<div class="page"><h2>KVKK Aydınlatma Metni</h2><div style="font-size:14px;line-height:1.55"><p><b>Veri sorumlusu:</b> Uygulama sahibi (6698 sayılı Kişisel Verilerin Korunması Kanunu kapsamında). <i>[Şirket adı, adres ve iletişim bilgisi buraya yazılacak]</i></p>
+<p><b>İşlenen veriler:</b> E-posta adresi, şifre (şifrelenmiş), bebeğe ait ad, doğum tarihi, boy, kilo, baş çevresi, fotoğraf, video, ultrason görüntüleri ve kullanıcının yazdığı anı metinleri. Bebeğe ait veriler çocuğun kişisel verisi olup, yasal temsilci olarak veli tarafından girilir. Sağlık verileri özel nitelikli kişisel veridir.</p>
+<p><b>Amaç:</b> Hesabın oluşturulması, anı defterinin oluşturulması, saklanması, cihazlar arası senkronizasyon ve güvenlik.</p>
+<p><b>Hukuki sebep ve açık rıza:</b> Özel nitelikli veriler (sağlık bilgileri dahil) yalnızca açık rızanız ile işlenir. Rızanızı dilediğiniz an geri alabilirsiniz.</p>
+<p><b>Aktarım:</b> Veriler yalnızca hizmetin sunulması için bulut altyapı sağlayıcısına aktarılır; üçüncü kişilerle pazarlama amacıyla paylaşılmaz. Yurt dışındaki sunuculara aktarım yapılıyorsa KVKK m.9 şartlarına uyulur.</p>
+<p><b>Haklarınız (m.11):</b> Verilerinizin işlenip işlenmediğini öğrenme, bilgi talep etme, düzeltme, silme/yok etme, itiraz etme ve zarar halinde tazminat talep etme.</p>
+<p><b>Saklama:</b> Hesabınız silindiğinde tüm verileriniz yasal süreler dışında silinir.</p>
+<p class="note">Bu metin örnektir; yayından önce bir hukukçu tarafından gözden geçirilmelidir.</p></div></div>`}
+const logo=z=>`<svg width="${z}" height="${z}" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#fff" stroke="var(--ac)" stroke-width="3"/><path d="M12 28c7-3 14-2 20 3 6-5 13-6 20-3v22c-7-3-14-2-20 3-6-5-13-6-20-3z" fill="var(--ac)"/><path d="M32 31v22" stroke="#fff" stroke-width="2"/><path d="M32 22c-4-6-12 0-6 6l6 5 6-5c6-6-2-12-6-6z" fill="#ffc94d"/><circle cx="50" cy="14" r="2.5" fill="#ffc94d"/><circle cx="14" cy="15" r="2" fill="#ffc94d"/></svg>`;
+const FP=['top:-14px;left:-14px','top:-14px;right:-14px','bottom:-14px;left:-14px','bottom:-14px;right:-14px','top:-14px;left:calc(50% - 11px)','bottom:-14px;left:calc(50% - 11px)','top:calc(50% - 11px);left:-14px','top:calc(50% - 11px);right:-14px'],FE=['🌸','🌼','🌷','🌺','🌻','🌹','🌼','🌸'];
+function frame(id,t,acc,m,pre){return `<label class="fr" for="${id}" id="fr_${id}" style="${pre?`background-image:url(${pre})`:''}">${FP.map((p,i)=>`<i style="${p}">${FE[i]}</i>`).join('')}<span ${pre?'style="display:none"':''}>📷<br>${t}</span><input id="${id}" type="file" accept="${acc}" ${m?'multiple':''}></label>`}
+function showFr(id,u){const f=$('#fr_'+id);f.style.backgroundImage=`url(${u})`;const sp=f.querySelector('span');if(sp)sp.style.display='none'}
+let CL=null,tm=0,sent={};
+const H=async x=>{try{return [...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode('mk:'+x)))].map(b=>b.toString(16).padStart(2,'0')).join('')}catch(e){return x}};
+(async()=>{try{const d=await claude.use('db'),u=await claude.use('user');if(d&&u){CL=d.collection('data/users/'+await u.id());S.cl='ok'}}catch(e){}S.cl=S.cl||'no';if(S.view=='cloud')render()})();
+function cloudSoon(){clearTimeout(tm);if(!CL)return;S.sy='⏳ Eşitleniyor…';tm=setTimeout(cloudPush,1500)}
+async function cloudPush(){if(!CL||!S.user)return;try{const bs=S.babies.map(b=>({...b,pages:undefined})),cl=JSON.parse(JSON.stringify(S.set)),bg=cl.bgImg||'';delete cl.bgImg;
+const docs={meta:{email:S.user.email,h:S.user.pw,babies:bs,set:cl,upd:S.upd||Date.now()},bg:{img:bg}};
+S.babies.forEach(b=>b.pages.forEach((p,i)=>docs['p_'+p.id]={b:b.id,o:i,...p,media:p.media.filter(m=>m.t=='i')}));
+for(const k in docs){const j=JSON.stringify(docs[k]);if(sent[k]===j)continue;if(j.length>250000){S.sy='⚠️ Bir sayfa bulut için çok büyük (daha az fotoğraf ekleyin).';continue}await CL.doc(k).set(JSON.parse(j));sent[k]=j}
+const sn=await CL.get();for(const d of sn.docs)if(!docs[d.id])await CL.doc(d.id).delete();
+if(!S.sy||!S.sy.startsWith('⚠️'))S.sy='✅ Buluta kaydedildi: '+new Date().toLocaleTimeString('tr-TR')}catch(e){S.sy='⚠️ Bulut hatası: '+(e.message||e.code)}if(S.view=='cloud')render()}
+async function cloudPull(){if(!CL)return null;try{const m=await CL.doc('meta').get();if(!m.exists)return null;const md=m.data(),bg=(await CL.doc('bg').get()).data(),sn=await CL.get(),ps=sn.docs.filter(d=>d.id.startsWith('p_')).map(d=>d.data());
+return{email:md.email,h:md.h,upd:md.upd,set:{...md.set,bgImg:bg&&bg.img||''},babies:md.babies.map(b=>({...b,pages:ps.filter(p=>p.b==b.id).sort((x,y)=>x.o-y.o).map(p=>{const q={...p};delete q.b;delete q.o;return q})}))}}catch(e){return null}}
+async function wipe(){if(!confirm('⚠️ Tüm verileriniz (bebek bilgileri, sayfalar, fotoğraflar, ayarlar ve bulut kaydı) kalıcı olarak silinecek. Bu işlem geri alınamaz. Devam etmek istiyor musunuz?'))return;if(!confirm('Emin misiniz? Son onay: her şey silinecek.'))return;clearTimeout(tm);try{localStorage.removeItem(key(S.user.email))}catch(e){}
+if(CL){try{const sn=await CL.get();for(const d of sn.docs)await CL.doc(d.id).delete()}catch(e){}}sent={};S.user=null;S.babies=[];S.set={font:'Quicksand',color:'#e88fa3',bgImg:''};S.view='auth';render();alert('Tüm verileriniz silindi.')}
+$('#lg').innerHTML=logo(34);
+render();
+</script></body></html>
